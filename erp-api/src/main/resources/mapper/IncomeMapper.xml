@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.kingborn.erp.fc.dao.IncomeDao">
+
+    <resultMap type="com.alibaba.fastjson.JSONObject" id="resultObj"></resultMap>
+
+    <select id="queryPage" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.fc.model.Income">
+        SELECT co.* from fc_income co left join
+        uc_customer c on co.customerId = c.id WHERE 1 = 1
+        <if test="query.name != null and query.name != ''">
+            AND (
+              co.`code` LIKE concat('%', #{query.name}, '%') OR
+              c.`name` LIKE concat('%', #{query.name}, '%') OR
+              c.`code` LIKE concat('%', #{query.name}, '%')
+              )
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND co.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND co.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY co.createdTime DESC
+    </select>
+
+</mapper>

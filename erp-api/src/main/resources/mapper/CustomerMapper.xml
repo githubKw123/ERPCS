@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.kingborn.erp.uc.dao.CustomerDao">
+
+
+    <resultMap type="com.alibaba.fastjson.JSONObject" id="resultObj"></resultMap>
+
+    <select id="queryPage" parameterType="com.alibaba.fastjson.JSONObject" resultMap="resultObj">
+        SELECT c.*, cc.`name` as contactName, cc.mobile, cc.phone, cc.position, cc.qq, cc.address from uc_customer c left join
+        uc_customer_contact cc on c.id = cc.customerId WHERE 1 = 1 AND (cc.`primary` = true or cc.`primary` is null)
+        <if test="query.categoryId != null">
+            AND c.`categoryId` = #{query.categoryId}
+        </if>
+        <if test="query.name != null">
+            AND c.`name` LIKE concat('%', #{query.name}, '%')
+        </if>
+        <if test="query.code != null">
+            AND c.`code` = #{query.code}
+        </if>
+        <if test="query.contactName != null">
+            AND cc.`name` LIKE concat('%', #{query.contactName}, '%')
+        </if>
+        <if test="query.mobile != null">
+            AND cc.`mobile` = #{query.mobile}
+        </if>
+        ORDER BY c.createdTime DESC
+    </select>
+
+</mapper>

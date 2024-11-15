@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.kingborn.erp.wc.dao.StockRecordDao">
+
+
+    <resultMap type="com.alibaba.fastjson.JSONObject" id="resultObj"></resultMap>
+
+    <!-- 收发明细表 -->
+    <select id="analysisList" resultType="net.kingborn.erp.wc.model.StockRecord">
+        SELECT sr.* from wc_stock_record sr WHERE 1 = 1
+        <if test="productIdList != null and productIdList.size() > 0">
+            AND sr.`productId` IN
+            <foreach collection="productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="warehouseIdList != null and warehouseIdList.size() > 0">
+            AND sr.`warehouseId` IN
+            <foreach collection="warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND sr.`issueDate` <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND sr.`issueDate` <![CDATA[  <= ]]> #{endDate}
+        </if>
+        ORDER BY sr.productId ASC, sr.issueDate ASC
+    </select>
+
+    <!-- 不同的商品ID列表 -->
+    <select id="distinctProductIdList" parameterType="com.alibaba.fastjson.JSONObject" resultType="java.lang.String">
+        SELECT DISTINCT(sr.`productId`) from wc_stock_record sr WHERE 1 = 1
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND sr.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND sr.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND sr.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY sr.productId ASC
+    </select>
+
+    <!-- 商品所在仓库列表 -->
+    <select id="distinctWarehouseIdListByProduct" resultType="java.lang.String">
+        SELECT DISTINCT(sr.`warehouseId`) from wc_stock_record sr WHERE 1 = 1
+        <if test="productId != null and productId != ''">
+            AND sr.`productId` = #{productId}
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND sr.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND sr.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND sr.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY sr.warehouseId ASC
+    </select>
+
+    <!-- 商品在仓库最近的出入记录 -->
+    <select id="findLatestRecord" resultType="net.kingborn.erp.wc.model.StockRecord">
+        SELECT sr.* from wc_stock_record sr WHERE 1 = 1
+        <if test="productId != null and productId != ''">
+            AND sr.`productId` = #{productId}
+        </if>
+        <if test="warehouseId != null and warehouseId != ''">
+            AND sr.`warehouseId` = #{warehouseId}
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND sr.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND sr.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY sr.createdTime DESC LIMIT 1
+    </select>
+
+    <!-- 不同的商品仓库ID列表 -->
+    <select id="distinctProductWarehouseIdList" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.wc.model.StockRecord">
+        SELECT DISTINCT sr.`productId`, sr.`warehouseId` from wc_stock_record sr WHERE 1 = 1
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND sr.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND sr.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND sr.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND sr.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY sr.productId, sr.warehouseId ASC
+    </select>
+
+</mapper>

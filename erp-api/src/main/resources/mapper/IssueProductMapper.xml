@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.kingborn.erp.wc.dao.IssueProductDao">
+
+
+    <resultMap type="com.alibaba.fastjson.JSONObject" id="resultObj"></resultMap>
+
+    <!-- 销售明细表 -->
+    <select id="analysisSaleList" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.wc.model.IssueProduct">
+        SELECT sp.* from wc_issue_product sp left join
+        bc_sale s on s.id = sp.businessId WHERE 1 = 1 AND (sp.`businessType` = 'sell' OR sp.`businessType` = 'returned')
+        <if test="query.customerIdList != null and query.customerIdList.size() > 0">
+            AND s.`customerId` IN
+            <foreach collection="query.customerIdList" item="customerId" separator="," open="(" close=")">
+                #{customerId}
+            </foreach>
+        </if>
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND sp.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND sp.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.sellerIdList != null and query.sellerIdList.size() > 0">
+            AND s.`sellerId` IN
+            <foreach collection="query.sellerIdList" item="sellerId" separator="," open="(" close=")">
+                #{sellerId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND s.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND s.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY sp.createdTime DESC
+    </select>
+
+    <!-- 销售汇总表（按商品） -->
+    <select id="analysisSaleListByProduct" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.wc.model.IssueProduct">
+        SELECT sp.productId, sp.warehouseId, SUM(sp.quantity) as quantity, sp.price, SUM(sp.amount) as amount
+               from wc_issue_product sp left join
+        bc_sale s on s.id = sp.businessId WHERE 1 = 1 AND (sp.`businessType` = 'sell' OR sp.`businessType` = 'returned')
+        <if test="query.customerIdList != null and query.customerIdList.size() > 0">
+            AND s.`customerId` IN
+            <foreach collection="query.customerIdList" item="customerId" separator="," open="(" close=")">
+                #{customerId}
+            </foreach>
+        </if>
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND sp.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND sp.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND s.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND s.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        GROUP BY sp.productId, sp.warehouseId
+        ORDER BY sp.createdTime DESC
+    </select>
+
+    <!-- 销售汇总表（按客户） -->
+    <select id="analysisSaleListByCustomer" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.sc.model.SaleCustomerSummary">
+        SELECT s.customerId, sp.productId, sp.warehouseId, SUM(sp.quantity) as quantity, sp.price, SUM(sp.amount) as amount
+        from wc_issue_product sp left join
+        bc_sale s on s.id = sp.businessId WHERE 1 = 1 AND (sp.`businessType` = 'sell' OR sp.`businessType` = 'returned')
+        <if test="query.customerIdList != null and query.customerIdList.size() > 0">
+            AND s.`customerId` IN
+            <foreach collection="query.customerIdList" item="customerId" separator="," open="(" close=")">
+                #{customerId}
+            </foreach>
+        </if>
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND sp.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND sp.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND s.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND s.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        GROUP BY s.customerId, sp.productId, sp.warehouseId
+        ORDER BY sp.createdTime DESC
+    </select>
+
+    <!-- 采购明细表 -->
+    <select id="analysisPurchaseList" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.wc.model.IssueProduct">
+        SELECT pp.* from wc_issue_product pp left join
+        bc_purchase p on p.id = pp.businessId WHERE 1 = 1 AND (pp.`businessType` = 'buy' OR pp.`businessType` = 'refund')
+        <if test="query.supplierIdList != null and query.supplierIdList.size() > 0">
+            AND p.`supplierId` IN
+            <foreach collection="query.supplierIdList" item="supplierId" separator="," open="(" close=")">
+                #{supplierId}
+            </foreach>
+        </if>
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND pp.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND pp.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND p.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND p.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY pp.createdTime DESC
+    </select>
+
+    <!-- 采购汇总表（按商品） -->
+    <select id="analysisPurchaseListByProduct" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.wc.model.IssueProduct">
+        SELECT pp.productId, pp.warehouseId, SUM(pp.quantity) as quantity, pp.price, SUM(pp.amount) as amount
+        from wc_issue_product pp left join
+        bc_purchase p on p.id = pp.businessId WHERE 1 = 1 AND (pp.`businessType` = 'buy' OR pp.`businessType` = 'refund')
+        <if test="query.supplierIdList != null and query.supplierIdList.size() > 0">
+            AND p.`supplierId` IN
+            <foreach collection="query.supplierIdList" item="supplierId" separator="," open="(" close=")">
+                #{supplierId}
+            </foreach>
+        </if>
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND pp.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND pp.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND p.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND p.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        GROUP BY pp.productId, pp.warehouseId
+        ORDER BY pp.createdTime DESC
+    </select>
+
+    <!-- 采购汇总表（按供应商） -->
+    <select id="analysisPurchaseListBySupplier" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.sc.model.PurchaseSupplierSummary">
+        SELECT p.supplierId, pp.productId, pp.warehouseId, SUM(pp.quantity) as quantity, pp.price, SUM(pp.amount) as amount
+        from wc_issue_product pp left join
+        bc_purchase p on p.id = pp.businessId WHERE 1 = 1 AND (pp.`businessType` = 'buy' OR pp.`businessType` = 'refund')
+        <if test="query.supplierIdList != null and query.supplierIdList.size() > 0">
+            AND p.`supplierId` IN
+            <foreach collection="query.supplierIdList" item="supplierId" separator="," open="(" close=")">
+                #{supplierId}
+            </foreach>
+        </if>
+        <if test="query.productIdList != null and query.productIdList.size() > 0">
+            AND pp.`productId` IN
+            <foreach collection="query.productIdList" item="productId" separator="," open="(" close=")">
+                #{productId}
+            </foreach>
+        </if>
+        <if test="query.warehouseIdList != null and query.warehouseIdList.size() > 0">
+            AND pp.`warehouseId` IN
+            <foreach collection="query.warehouseIdList" item="warehouseId" separator="," open="(" close=")">
+                #{warehouseId}
+            </foreach>
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND p.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND p.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        GROUP BY p.supplierId, pp.productId, pp.warehouseId
+        ORDER BY pp.createdTime DESC
+    </select>
+
+</mapper>

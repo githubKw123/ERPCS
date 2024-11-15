@@ -1,0 +1,16 @@
+erp:
+  devMode: true
+
+server:
+  port: 9090
+
+spring:
+  datasource:
+    druid:
+      url: jdbc:mysql://localhost:3306/erp?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC&allowMultiQueries=true #url
+      username: root  #用户名
+      password: zkw622389zkw  #密码
+jwt:
+  config:
+    key: 49c089f061d4d546f259a14b49c35249
+    ttl: 360000000000

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="net.kingborn.erp.bc.dao.PurchaseDao">
+
+
+    <resultMap type="com.alibaba.fastjson.JSONObject" id="resultObj"></resultMap>
+
+    <select id="queryPage" parameterType="com.alibaba.fastjson.JSONObject" resultType="net.kingborn.erp.bc.model.Purchase">
+        SELECT p.* from bc_purchase p left join
+        uc_supplier s on p.supplierId = s.id WHERE 1 = 1
+        <if test="query.type != null">
+            AND p.`type` = #{query.type}
+        </if>
+        <if test="query.name != null and query.name != ''">
+            AND (
+              p.`code` LIKE concat('%', #{query.name}, '%') OR
+              s.`name` LIKE concat('%', #{query.name}, '%') OR
+              s.`code` LIKE concat('%', #{query.name}, '%')
+              )
+        </if>
+        <if test="query.startDate != null and query.startDate != ''">
+            AND p.`issueDate` <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null and query.endDate != ''">
+            AND p.`issueDate` <![CDATA[  <= ]]> #{query.endDate}
+        </if>
+        ORDER BY p.createdTime DESC
+    </select>
+
+</mapper>
